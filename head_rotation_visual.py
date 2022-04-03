@@ -5,7 +5,6 @@ import numpy as np
 
 
 # TODO: mit https://python-gtk-3-tutorial.readthedocs.io/en/latest/introduction.html#simple-example probieren
-
 # wrapped in a function for n arbitrary
 def trim_to_n(number, n):
     negative = False
