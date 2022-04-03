@@ -1,11 +1,15 @@
+import customtkinter as customtkinter
 import cv2
-import keyboard
 import mediapipe as mp
 import numpy as np
-
+from PIL import Image, ImageTk
+import tkinter as tk
 
 # TODO: mit https://python-gtk-3-tutorial.readthedocs.io/en/latest/introduction.html#simple-example probieren
 # wrapped in a function for n arbitrary
+from future.moves.tkinter import ttk
+
+
 def trim_to_n(number, n):
     negative = False
     if number < 0:
@@ -26,7 +30,7 @@ max_y_l = 0
 max_y_r = 0
 
 
-def show_frames():
+def get_frames():
     global max_y_l
     global max_y_r
     success, image = cap.read()
@@ -105,9 +109,6 @@ def show_frames():
             elif int(y) > max_y_r:
                 max_y_r = int(y)
 
-            if keyboard.is_pressed('q'):
-                max_y_l = max_y_r = 0
-
             #            if y < -10:
             #                text = "Looking Left"
             #            elif y > 10:
@@ -126,18 +127,59 @@ def show_frames():
             cv2.line(image, p1, p2, (255, 0, 0), 2)
 
             # Add the text on the image
-            cv2.putText(image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+            cv2.putText(image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (159, 6, 16), 2)
 
-            cv2.putText(image, "max. linksdrehung: " + str(abs(max_y_l)), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 255), 2)
-            cv2.putText(image, "max. rechtsdrehung: " + str(max_y_r), (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 255), 2)
+            # cv2.putText(image, "max. linksdrehung: " + str(abs(max_y_l)), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1,
+            #            (159, 6, 16), 2)
+            # cv2.putText(image, "max. rechtsdrehung: " + str(max_y_r), (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 1,
+            #            (159, 6, 16), 2)
 
-    cv2.imshow('Head Pose Estimation', image)
+    # cv2.imshow('Head Pose Estimation', image)
 
-    if cv2.waitKey(5) & 0xFF == 27:
-        cap.release()
+    return image
 
 
-while True:
+
+win = customtkinter.CTk()
+
+win.geometry("1900x900")
+
+label = tk.Label(win)
+label.grid(row=0, column=0)
+
+
+def show_frames():
+    cv2image = cv2.cvtColor(get_frames(), cv2.COLOR_BGR2RGB)
+    img = Image.fromarray(cv2image)
+    imgtk = ImageTk.PhotoImage(image=img)
+    label.imgtk = imgtk
+    label.configure(image=imgtk)
+    label.after(20, show_frames)
+    label.grid(row=0, column=0)
+
+    l = tk.Label(text="Deine Maximale Kopfdrehung nach links:  " + str(abs(max_y_l)) + "\n Deine Maximale Kopfdrehung nach rechts: " + str(abs(max_y_r)),font=("Arial", 20), background="gray", borderwidth=1, relief="ridge")
+    l.grid(row=0, column=1, padx = 10)
+
+
+
+def reset_max():
+    global max_y_l
+    global max_y_r
+    max_y_l = max_y_r = 0
+
+
+def layout():
+    button = customtkinter.CTkButton(win, text='Maximalwerte zurücksetzen', command=reset_max, border_width=1, border_color="white")
+    button.grid(row=2, column=0)
+
+    image = Image.open("logo.png")
+    image = ImageTk.PhotoImage(image)
+    imageLable = customtkinter.CTkButton(win, image=image, text="", width=400, height=60, border_width=1, border_color="white")
+    imageLable.grid(row=3, column=0, pady=10)
+
     show_frames()
+
+
+
+layout()
+win.mainloop()

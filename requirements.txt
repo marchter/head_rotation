@@ -4,3 +4,6 @@ opencv_python==4.5.5.64
 
 opencv-python~=4.5.5.64
 keyboard~=0.13.5
+customtkinter~=3.8
+future~=0.18.2
+Pillow~=9.1.0
